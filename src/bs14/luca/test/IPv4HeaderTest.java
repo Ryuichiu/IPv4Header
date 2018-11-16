@@ -1,9 +1,9 @@
 package bs14.luca.test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import bs14.luca.ipheader.IPv4Header;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class IPv4HeaderTest {
 
