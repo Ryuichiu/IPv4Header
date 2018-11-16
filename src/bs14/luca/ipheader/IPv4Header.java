@@ -2,7 +2,6 @@ package bs14.luca.ipheader;
 
 import java.text.DecimalFormat;
 import java.util.Scanner;
-import java.util.function.BinaryOperator;
 
 /**
  * This is a simple implementation a of a concortinated String as normal String or as Bits and a convertion from a anormal String to a BitsString
@@ -18,7 +17,8 @@ public class IPv4Header {
     private int version;
 
     /**
-     * @param ihl IP Header Length (IHL)
+     * @param ihl (5 x 32 bits -> calc)
+     *            IP Header Length (IHL)
      *            The length of the ip header data length (a multiple of 32)
      *            4 bits
      */
@@ -32,7 +32,8 @@ public class IPv4Header {
     private int tos = 24;
 
     /**
-     * @param packetLength Total length of the packet incl. header (576 - 655353 Bytes)
+     * @param packetLength (total length = header + data ---> 576 <= 160 + x Bits <= 655353 ---> data length = 514 to 655193 Bits available for data ---> calc)
+     *                     Total length of the packet incl. header (576 - 655353 Bytes)
      *                     16 bits
      */
     private int packetLength;
@@ -73,13 +74,15 @@ public class IPv4Header {
     private int ttl;
 
     /**
-     *  @param protocol Calls the type of protocol used for the userdata in the IPv4Header (6 = TCP, 17 = UDP)
+     *  @param protocol (= 0 because payload is not relevant for the purpose of this application)
+     *                  Calls the type of protocol used for the userdata in the IPv4Header (6 = TCP, 17 = UDP)
      *                  8 bits
      */
     private int protocol = 0;
 
     /**
-     *  @param checksum A sum that checks only the header.
+     *  @param checksum (needs to be calculated with someones own algorithm -> https://en.wikipedia.org/wiki/IPv4_header_checksum)
+     *                  A sum that checks only the header.
      *                  16 bits
      */
     private int checksum;
