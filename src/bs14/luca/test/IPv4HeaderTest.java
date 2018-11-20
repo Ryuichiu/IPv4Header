@@ -11,7 +11,7 @@ class IPv4HeaderTest {
     @Test
     void testGetOutputCase1()
     {
-        IPv4Header ip = new IPv4Header("4-24-0-2-0-128-0-192.168.1.1-192.168.2.1");
+        IPv4Header ip = new IPv4Header("4-24-0-2-0-128-0-192.168.1.1-192.168.2.1");//4-24-0-000-0-128-0-192.168.1.1-192.168.2.1
         assertEquals("4-5-24-1440-0-2-0-128-0-0-192.168.1.1-192.168.2.1", ip.getOutput());
 
     }
