@@ -22,9 +22,15 @@ public class Controller {
      */
 
     public static void main(String[] args) {
-       // var input = getInput();
-       // System.out.println(input);
-        System.out.println(new IPv4Header("4-24-0-1-0-120-0-1.1.1.1-2.2.2.2").getOutput());
+        var input = getInput();
+        var ip = new IPv4Header(input);
+        System.out.println(ip.getOutput());
+        System.out.println(ip.getOutputBin());
+        var inputBin = ip.getOutputBin();
+        var ipBin = new IPv4Header(inputBin);
+        System.out.println(ipBin.getOutputBinToDec());
+        //4-24-0-1-0-128-0-1.1.1.1-2.2.2.2"
+        //4-5-24-1440-0-1-0-128-0-0-1.1.1.1-2.2.2.2
     }
 
     private static String getInput() {
@@ -39,6 +45,6 @@ public class Controller {
         System.out.println("Please enter destination IP: ");
         var destinationIP = sc.nextLine();
 
-        return String.join("-", version, "24", "0", "0", "0", ttl, "0", sourceIP, destinationIP);
+        return String.join("-", version, "24", "0", "1", "0", ttl, "0", sourceIP, destinationIP);
     }
 }
