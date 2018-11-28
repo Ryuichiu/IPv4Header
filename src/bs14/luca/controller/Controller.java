@@ -18,8 +18,8 @@ public class Controller {
         var input = getInput();
         var ip = new IPv4Header(input);
         System.out.println(ip.getOutput());
-        System.out.println(ip.getOutputBin());
         var inputBin = ip.getOutputBin();
+        System.out.println(inputBin);
         var ipBin = new IPv4Header(inputBin);
         System.out.println(ipBin.getOutputBinToDec());
         //4-24-0-1-0-128-0-1.1.1.1-2.2.2.2"
