@@ -1,16 +1,17 @@
 package bs14.luca.ipheader;
 
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 /**
- * This is a simple implementation a of a concortinated String as normal String or as Bits and a convertion from a anormal String to a BitsString
+ * This is a simple implementation a of a concatenated String as normal String or as Bits and a conversion from a normal String to a BinaryString
  *
  * @Author Luca Vollandt
  */
 public class IPv4Header {
 
     /**
-     * @param version The verion number of the IPv4-packet
+     * @param version The version number of the IPv4-packet
      *                4 bits
      */
     private int version; //user
@@ -97,15 +98,15 @@ public class IPv4Header {
     private String checksumString; //calc
 
     /**
-     *  @param sourceIP Contains the source adress of the IP packet
+     *  @param sourceIP Contains the source address of the IP packet
      *                  32 bits
      */
     private int[] sourceIP; //user
     private String sourceIpString; //user
 
     /**
-     *  @param targetIP Contains the target adress of the IP packet
-     *                  32 bits
+     *  @param destinationIP Contains the target address of the IP packet
+     *                       32 bits
      */
     private int[] destinationIP; //user
     private String destinationIpString; //user
@@ -114,50 +115,103 @@ public class IPv4Header {
         var ss = s.split("-");
         var si = new int[ss.length-2];
         for (int i = 0; i < si.length; i++) si[i] = Integer.parseInt(ss[i]);
+        var isBin = !Pattern.compile("[^01.-]").matcher(s).find();
 
         version = si[0];
         versionString = ss[0];
 
         ihl = calcIhl();
-        ihlString = Integer.toString(ihl);
+        ihlString = isBin?ss[1]:Integer.toString(ihl);
 
         tos = si[1];
-        tosString = ss[1];
+        tosString = isBin?ss[2]:ss[1];
 
-        packetLength = getPacketLength();
-        packetLengthString = Integer.toString(packetLength);
+        packetLength = isBin?0:getPacketLength();
+        packetLengthString = isBin?ss[3]:Integer.toString(packetLength);
 
         identification = si[2];
-        identificationString = ss[2];
+        identificationString = isBin?ss[4]:ss[2];
 
         flags = si[3];
-        flagsString = ss[3];
+        flagsString = isBin?ss[5]:ss[3];
 
         fragmentOffset = si[4];
-        fragmentOffsetString = ss[4];
+        fragmentOffsetString = isBin?ss[6]:ss[4];
 
         ttl = si[5];
-        ttlString = ss[5];
+        ttlString = isBin?ss[7]:ss[5];
 
         protocol = si[6];
-        protocolString = ss[6];
+        protocolString = isBin?ss[8]:ss[6];
 
-        checksum = getChecksum();
-        checksumString = Integer.toString(checksum);
-
-        sourceIpString = ss[7];
+        sourceIpString = isBin?ss[10]:ss[7];
         var sipStringArray = sourceIpString.split("\\.");
         sourceIP = new int[sipStringArray.length];
         for (int i = 0; i < sourceIP.length; i++) sourceIP[i] = Integer.parseInt(sipStringArray[i]);
 
-        destinationIpString = ss[8];
+        destinationIpString = isBin?ss[11]:ss[8];
         var dipStringArray = destinationIpString.split("\\.");
         destinationIP = new int[dipStringArray.length];
         for (int i = 0; i < destinationIP.length; i++) destinationIP[i] = Integer.parseInt(dipStringArray[i]);
+
+        checksum = getChecksum();
+        checksumString = isBin?ss[9]:Integer.toString(checksum);
     }
 
+    /**
+     * implementation of a modified and simplified version of the Fletcher Checksum algorithm as Fletcher-16
+     * calc the checksum of the ip header
+     *
+     * splits the header in its components
+     * sum1 is only the summation of the value of all components
+     * sum2 represents the summation of all intermediate results of sum1
+     *
+     * varies by the length of data append to the packet and the version of the packet
+     *
+     * @return sum1+sum2
+     */
     public int getChecksum() {
-        return 0;
+        var sum1 = 0;
+        var sum2 = 0;
+
+        sum1 = (sum1 + version) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + ihl) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + tos) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + packetLength) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + identification) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + flags) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + fragmentOffset) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + ttl) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + protocol) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + checksum) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + sourceIP[0]) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + sourceIP[1]) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + sourceIP[2]) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + sourceIP[3]) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + destinationIP[0]) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + destinationIP[1]) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + destinationIP[2]) % 255;
+        sum2 = (sum1+sum2) % 255;
+        sum1 = (sum1 + destinationIP[3]) % 255;
+        sum2 = (sum1+sum2) % 255;
+
+        return sum1+sum2;
     }
 
     private int getPacketLength() {
@@ -198,22 +252,18 @@ public class IPv4Header {
         var dipBinArray = new String[destinationIP.length];
         for (int i = 0; i < dipBinArray.length; i++) dipBinArray[i] = Integer.toBinaryString(destinationIP[i]);
 
-        addLeadingZeros(versionBin, 4);//=for (int i = 0; i < 4-versionBin.length(); i++) versionBin = "0" + versionBin;
-        for (int i = 0; i < 4-ihlBin.length(); i++) ihlBin = "0" + ihlBin;
-        for (int i = 0; i < 8-tosBin.length(); i++) tosBin = "0" + tosBin;
-        for (int i = 0; i < 16-packetLengthBin.length(); i++) packetLengthBin = "0" + packetLengthBin;
-        for (int i = 0; i < 16-identificationBin.length(); i++) identificationBin = "0" + identificationBin;
-        for (int i = 0; i < 3-flagsBin.length(); i++) flagsBin = "0" + flagsBin;
-        for (int i = 0; i < 13-fragsBin.length(); i++) fragsBin = "0" + fragsBin;
-        for (int i = 0; i < 8-ttlBin.length(); i++) ttlBin = "0" + ttlBin;
-        for (int i = 0; i < 8-protocolBin.length(); i++) protocolBin = "0" + protocolBin;
-        for (int i = 0; i < 16-checksumBin.length(); i++) checksumBin = "0" + checksumBin;
-        for (int j = 0; j < sipBinArray.length; j++) {
-            for (int i = 0; i < 32-sipBinArray[j].length(); i++) sipBinArray[j] = "0" + sipBinArray[j];
-        }
-        for (int j = 0; j < dipBinArray.length; j++) {
-            for (int i = 0; i < 32-dipBinArray[j].length(); i++) dipBinArray[j] = "0" + dipBinArray[j];
-        }
+        versionBin = addLeadingZeros(versionBin, 4);
+        ihlBin = addLeadingZeros(ihlBin, 4);
+        tosBin = addLeadingZeros(tosBin, 8);
+        packetLengthBin = addLeadingZeros(packetLengthBin, 16);
+        identificationBin = addLeadingZeros(identificationBin, 16);
+        flagsBin = addLeadingZeros(flagsBin, 3);
+        fragsBin = addLeadingZeros(fragsBin, 13);
+        ttlBin = addLeadingZeros(ttlBin, 8);
+        protocolBin = addLeadingZeros(protocolBin, 8);
+        checksumBin = addLeadingZeros(checksumBin, 16);
+        for (int i = 0; i < sipBinArray.length; i++) sipBinArray[i] = addLeadingZeros(sipBinArray[i], 8);
+        for (int i = 0; i < dipBinArray.length; i++) dipBinArray[i] = addLeadingZeros(dipBinArray[i], 8);
 
         var sourceIpBin = String.join(".", sipBinArray[0], sipBinArray[1], sipBinArray[2], sipBinArray[3]);
         var destinationIpBin = String.join(".", dipBinArray[0], dipBinArray[1], dipBinArray[2], dipBinArray[3]);
@@ -221,24 +271,36 @@ public class IPv4Header {
         return String.join("-", versionBin,ihlBin,tosBin,packetLengthBin,identificationBin,flagsBin,fragsBin,ttlBin,protocolBin,checksumBin,sourceIpBin,destinationIpBin);
     }
 
-    private void addLeadingZeros(String bin, int length) {
-        for (int i = 0; i < length-bin.length();i++) bin = "0"+bin;
+    private String addLeadingZeros(String bin, int length) {
+        var sb = new StringBuilder(bin);
+        for (int i = 0; i < length-bin.length();i++) sb.insert(0,0);
+        return sb.toString();
     }
 
     public String getOutputBinToDec() {
-        var input = getOutputBin();
         var sb = new StringBuilder();
         var res = 0;
+        var sipStringArray = sourceIpString.split("\\.");
+        var dipStringArray = destinationIpString.split("\\.");
 
-        String[] split = input.split("[ ]");
+        String[] split = {versionString, ihlString, tosString, packetLengthString,
+                identificationString, flagsString, fragmentOffsetString, ttlString,
+                protocolString, checksumString, sipStringArray[0], sipStringArray[1],
+                sipStringArray[2], sipStringArray[3], dipStringArray[0], dipStringArray[1],
+                dipStringArray[2], dipStringArray[3]};
         for (int i = 0; i < split.length; i++) {
             String s = split[i];
             for (int j = s.length() - 1; j >= 0; j--) {
-                res += Math.pow(2, j);
+                var bit = Integer.parseInt(s.substring(j,j+1));
+                res += bit * Math.pow(2, s.length()-1-j);
             }
             sb.append(res);
             res = 0;
-            if (i < split.length-1) sb.append("-");
+            if (i >= 10 && i < 17) {
+                if (i == 13) sb.append("-"); else sb.append(".");
+            } else if (i < split.length-1) {
+                sb.append("-");
+            }
         }
 
         return sb.toString();

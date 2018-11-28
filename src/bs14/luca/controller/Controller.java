@@ -30,7 +30,7 @@ public class Controller {
         var ipBin = new IPv4Header(inputBin);
         System.out.println(ipBin.getOutputBinToDec());
         //4-24-0-1-0-128-0-1.1.1.1-2.2.2.2"
-        //4-5-24-1440-0-1-0-128-0-0-1.1.1.1-2.2.2.2
+        //4-5-24-736-0-1-0-128-0-188-1.1.1.1-2.2.2.2
     }
 
     private static String getInput() {
