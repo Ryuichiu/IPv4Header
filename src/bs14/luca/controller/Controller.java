@@ -7,16 +7,9 @@ import java.util.Scanner;
 public class Controller {
 
     /**
-     * version 0
-     * ttl 7
-     * qip 10
-     * dip 11
-     *
-     * tos 2 24
-     * id 4 0
-     * flags 5 0
-     * fragoff 6 0
-     * proc 8 0
+     * Creates 2 new IPv4Header objects with a concatenated binary input and a concatenated decimal input and prints the
+     * plain output, the concatenated output converted to a binary string and the concatenated binary input converted
+     * to a plain string
      *
      * @param args
      */
@@ -33,11 +26,17 @@ public class Controller {
         //4-5-24-736-0-1-0-128-0-188-1.1.1.1-2.2.2.2
     }
 
+    /**
+     * Asks the user to enter input into the console to collect values for the IPv4Header
+     *
+     * @return concatenated string with the "-" delimiter
+     */
     private static String getInput() {
         var sc = new Scanner(System.in);
 
         System.out.println("Please enter the version: ");
         var version = sc.nextLine();
+        while (!"4".equals(version)) version = sc.nextLine();
         System.out.println("Please enter the time to live (ttl): ");
         var ttl = sc.nextLine();
         System.out.println("Please enter source IP: ");

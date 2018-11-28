@@ -16,6 +16,7 @@ public class IPv4Header {
      */
     private int version; //user
     private String versionString; //user
+    private int versionBinLength = 4;
 
     /**
      * @param ihl (5 x 32 bits -> calc)
@@ -25,6 +26,7 @@ public class IPv4Header {
      */
     private int ihl; //calc
     private String ihlString; //calc
+    private int ihlBinLength = 4;
 
     /**
      * @param tos Type Of Service (TOS)
@@ -33,6 +35,7 @@ public class IPv4Header {
      */
     private int tos = 24; //manual
     private String tosString = "24"; //manual
+    private int tosBinLength = 8;
 
     /**
      * @param packetLength (total length = header + data ---> 576 <= 160 + x Bits <= 65535 ---> data length = 514 to 65375 Bits available for data ---> calc)
@@ -41,6 +44,7 @@ public class IPv4Header {
      */
     private int packetLength; //calc
     private String packetLengthString; //calc
+    private int packetBinLength = 16;
 
     /**
      *  @param identification This and the following two param Flags and Fragment Offset are responsible the reassembly.
@@ -50,6 +54,7 @@ public class IPv4Header {
      */
     private int identification = 0; //manual
     private String identificationString = "0"; //manual
+    private int identificationBinLength = 16;
 
     /**
      * @param flags 3 bits with following meanings:
@@ -59,6 +64,7 @@ public class IPv4Header {
      */
     private int flags = 1; //manual
     private String flagsString = "0"; //manual
+    private int flagsBinLength = 3;
 
     /**
      *  @param fragmentOffset 13 bits
@@ -72,6 +78,7 @@ public class IPv4Header {
      */
     private int fragmentOffset = 0; //manual
     private String fragmentOffsetString = "0"; //manual
+    private int fragsBinLength = 13;
 
     /**
      *  @param ttl Time To Live (TTL)
@@ -80,6 +87,7 @@ public class IPv4Header {
      */
     private int ttl; //user
     private String ttlString; //user
+    private int ttlBinLength = 8;
 
     /**
      *  @param protocol (= 0 because payload is not relevant for the purpose of this application)
@@ -88,6 +96,7 @@ public class IPv4Header {
      */
     private int protocol = 0; //manual
     private String protocolString = "0"; //manual
+    private int protocolBinLength = 8;
 
     /**
      *  @param checksum (needs to be calculated with someones own algorithm -> https://en.wikipedia.org/wiki/IPv4_header_checksum)
@@ -96,6 +105,7 @@ public class IPv4Header {
      */
     private int checksum; //calc
     private String checksumString; //calc
+    private int checksumBinLength = 16;
 
     /**
      *  @param sourceIP Contains the source address of the IP packet
@@ -103,6 +113,7 @@ public class IPv4Header {
      */
     private int[] sourceIP; //user
     private String sourceIpString; //user
+    private int sipBinArrayLength = 32;
 
     /**
      *  @param destinationIP Contains the target address of the IP packet
@@ -110,12 +121,20 @@ public class IPv4Header {
      */
     private int[] destinationIP; //user
     private String destinationIpString; //user
+    private int dipBinArrayLength = 32;
 
+    /**
+     * Splits the input and sets the fields initially
+     *
+     * @param s user input
+     */
     public IPv4Header (String s) {
+        var isBin = !Pattern.compile("[^01.-]").matcher(s).find();
         var ss = s.split("-");
         var si = new int[ss.length-2];
-        for (int i = 0; i < si.length; i++) si[i] = Integer.parseInt(ss[i]);
-        var isBin = !Pattern.compile("[^01.-]").matcher(s).find();
+        if (!isBin) {
+            for (int i = 0; i < si.length; i++) si[i] = Integer.parseInt(ss[i]);
+        }
 
         version = si[0];
         versionString = ss[0];
@@ -154,7 +173,7 @@ public class IPv4Header {
         destinationIP = new int[dipStringArray.length];
         for (int i = 0; i < destinationIP.length; i++) destinationIP[i] = Integer.parseInt(dipStringArray[i]);
 
-        checksum = getChecksum();
+        checksum = calcChecksum();
         checksumString = isBin?ss[9]:Integer.toString(checksum);
     }
 
@@ -162,15 +181,9 @@ public class IPv4Header {
      * implementation of a modified and simplified version of the Fletcher Checksum algorithm as Fletcher-16
      * calc the checksum of the ip header
      *
-     * splits the header in its components
-     * sum1 is only the summation of the value of all components
-     * sum2 represents the summation of all intermediate results of sum1
-     *
-     * varies by the length of data append to the packet and the version of the packet
-     *
      * @return sum1+sum2
      */
-    public int getChecksum() {
+    public int calcChecksum() {
         var sum1 = 0;
         var sum2 = 0;
 
@@ -214,10 +227,24 @@ public class IPv4Header {
         return sum1+sum2;
     }
 
+    /**
+     * getter for the checksum
+     *
+     * @return checksum
+     */
+    public int getChecksum() {
+        return checksum;
+    }
+
+    /**
+     * Asks for additional data and its length
+     *
+     * @return packetLength
+     */
     private int getPacketLength() {
         var sc = new Scanner(System.in);
         System.out.println("Do you want to add data(true/false)?");
-        var add = sc.nextBoolean();
+        var add = false;//sc.nextBoolean();
         if (add) {
             System.out.println("How big(576 - 65535)?");
             return calcIhl()*32+sc.nextInt()+576;
@@ -226,16 +253,33 @@ public class IPv4Header {
         return calcIhl()*32+576;
     }
 
+    /**
+     * gets the length of all fields and returns a multiple of 32
+     *
+     * @return ihl
+     */
     private int calcIhl() {
-        return (4+4+8+16+16+3+13+8+8+16+32+32)/32;
+        return (versionBinLength+ihlBinLength+tosBinLength+packetBinLength
+                +identificationBinLength+flagsBinLength+fragsBinLength+ttlBinLength+
+                protocolBinLength+checksumBinLength+sipBinArrayLength+dipBinArrayLength)/32;
     }
 
+    /**
+     * a plain concatenated string of all decimal values
+     *
+     * @return output
+     */
     public String getOutput() {
         return String.join("-", versionString,ihlString,tosString,packetLengthString,
                 identificationString,flagsString,fragmentOffsetString,ttlString,
                 protocolString,checksumString,sourceIpString,destinationIpString);
     }
 
+    /**
+     * a converted concatenated string of all binary values
+     *
+     * @return output as a binary
+     */
     public String getOutputBin() {
         var versionBin = Integer.toBinaryString(version);
         var ihlBin = Integer.toBinaryString(ihl);
@@ -271,12 +315,24 @@ public class IPv4Header {
         return String.join("-", versionBin,ihlBin,tosBin,packetLengthBin,identificationBin,flagsBin,fragsBin,ttlBin,protocolBin,checksumBin,sourceIpBin,destinationIpBin);
     }
 
+    /**
+     * adds leading zeros to the input binary string till its length exceeds the input length
+     *
+     * @param bin binary string
+     * @param length total length of the output
+     * @return formatted binary string
+     */
     private String addLeadingZeros(String bin, int length) {
         var sb = new StringBuilder(bin);
         for (int i = 0; i < length-bin.length();i++) sb.insert(0,0);
         return sb.toString();
     }
 
+    /**
+     * converts the fields in the form of a binary string to a concatenated decimal string
+     *
+     * @return output as a decimal
+     */
     public String getOutputBinToDec() {
         var sb = new StringBuilder();
         var res = 0;
