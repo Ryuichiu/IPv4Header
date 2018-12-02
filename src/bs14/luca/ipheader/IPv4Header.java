@@ -4,7 +4,8 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 /**
- * This is a simple implementation a of a concatenated String as normal String or as Bits and a conversion from a normal String to a BinaryString
+ * This is a simple implementation a of a concatenated String as normal String or as Bits and a conversion from a normal
+ * String to a BinaryString
  *
  * @Author Luca Vollandt
  */
@@ -38,7 +39,8 @@ public class IPv4Header {
     private int tosBinLength = 8;
 
     /**
-     * @param packetLength (total length = header + data ---> 576 <= 160 + x Bits <= 65535 ---> data length = 514 to 65375 Bits available for data ---> calc)
+     * @param packetLength (total length = header + data ---> 576 <= 160 + x Bits <= 65535 ---> data length = 514 to
+     *                     65375 Bits available for data ---> calc)
      *                     Total length of the packet incl. header (576 - 65535 Bytes)
      *                     16 bits
      */
@@ -49,7 +51,8 @@ public class IPv4Header {
     /**
      *  @param identification This and the following two param Flags and Fragment Offset are responsible the reassembly.
      *                        Unique identification of a datagram.
-     *                        This with Source IP field will make the user able to determine related fragments and reassemble with the Fragment Offset
+     *                        This with Source IP field will make the user able to determine related fragments and
+     *                        reassemble with the Fragment Offset
      *                        16 bits
      */
     private int identification = 0; //manual
@@ -68,13 +71,16 @@ public class IPv4Header {
 
     /**
      *  @param fragmentOffset 13 bits
-     *                        A number that indicates the position within the packet where the fragment starts for fragmented packets.
-     *                        The numbering refers to data blocks of 64 bit or 8 byte size and is independent of the fragmentation.
-     *                        A packet can therefore be split into smaller and smaller fragments several times in a row if necessary.
-     *                        Only the number of the first contained data block (offset) and the total length field have to be adapted to the length of the fragment.
-     *                        The first fragment, or an unfragmented packet, contains the value zero as offset.
-     *                        If a packet with 800 bytes of user data (offset numbering from 0 to 99) is divided into two fragments, the offset of the second fragment is number 50.
-     *                        Since the offset contains no indication how large the original packet is, the very last fragment must set the MF flag to zero.
+     *                        A number that indicates the position within the packet where the fragment starts for
+     *                        fragmented packets. The numbering refers to data blocks of 64 bit or 8 byte size and is
+     *                        independent of the fragmentation. A packet can therefore be split into smaller and smaller
+     *                        fragments several times in a row if necessary. Only the number of the first contained data
+     *                        block (offset) and the total length field have to be adapted to the length of the
+     *                        fragment. The first fragment, or an unfragmented packet, contains the value zero as
+     *                        offset. If a packet with 800 bytes of user data (offset numbering from 0 to 99) is divided
+     *                        into two fragments, the offset of the second fragment is number 50. Since the offset
+     *                        contains no indication how large the original packet is, the very last fragment must set
+     *                        the MF flag to zero.
      */
     private int fragmentOffset = 0; //manual
     private String fragmentOffsetString = "0"; //manual
@@ -82,7 +88,8 @@ public class IPv4Header {
 
     /**
      *  @param ttl Time To Live (TTL)
-     *             A value which represents how long a package can life. Each station (router) will decrease this number by 1 or the seconds the package remained in the station.
+     *             A value which represents how long a package can life. Each station (router) will decrease this number
+     *             by 1 or the seconds the package remained in the station.
      *             8 bits
      */
     private int ttl; //user
@@ -99,7 +106,8 @@ public class IPv4Header {
     private int protocolBinLength = 8;
 
     /**
-     *  @param checksum (needs to be calculated with someones own algorithm -> https://en.wikipedia.org/wiki/IPv4_header_checksum)
+     *  @param checksum (needs to be calculated with someones own algorithm ->
+     *                      https://en.wikipedia.org/wiki/IPv4_header_checksum)
      *                  A sum that checks only the header.
      *                  16 bits
      */
@@ -126,6 +134,8 @@ public class IPv4Header {
     /**
      * Splits the input and sets the fields initially
      *
+     * packetLength by default will the ihl because by default there is no data added.
+     *
      * @param s user input
      */
     public IPv4Header (String s) {
@@ -145,7 +155,7 @@ public class IPv4Header {
         tos = si[1];
         tosString = isBin?ss[2]:ss[1];
 
-        packetLength = isBin?0:getPacketLength();
+        packetLength = isBin?0:getPacketLength(false); //change to TRUE for additional data
         packetLengthString = isBin?ss[3]:Integer.toString(packetLength);
 
         identification = si[2];
@@ -238,19 +248,23 @@ public class IPv4Header {
 
     /**
      * Asks for additional data and its length
+     * (for the purpose of testing by default set to false)
      *
      * @return packetLength
      */
-    private int getPacketLength() {
+    private int getPacketLength(boolean add) {
         var sc = new Scanner(System.in);
-        System.out.println("Do you want to add data(true/false)?");
-        var add = false;//sc.nextBoolean();
-        if (add) {
-            System.out.println("How big(576 - 65535)?");
-            return calcIhl()*32+sc.nextInt()+576;
+        var header = calcIhl()*32;
+        if(add) {
+            System.out.println("Do you want to add data(true/false)?");
+            add = sc.nextBoolean();
+        }
+        if(add) {
+            System.out.println("How big("+header+" - "+(65535-header)+")?");
+            return Math.max(65535,header+Math.min(0,sc.nextInt()));
         }
 
-        return calcIhl()*32+576;
+        return header;
     }
 
     /**
@@ -259,9 +273,11 @@ public class IPv4Header {
      * @return ihl
      */
     private int calcIhl() {
-        return (versionBinLength+ihlBinLength+tosBinLength+packetBinLength
+        var headerLength = (versionBinLength+ihlBinLength+tosBinLength+packetBinLength
                 +identificationBinLength+flagsBinLength+fragsBinLength+ttlBinLength+
                 protocolBinLength+checksumBinLength+sipBinArrayLength+dipBinArrayLength)/32;
+
+        return headerLength;
     }
 
     /**
@@ -312,7 +328,8 @@ public class IPv4Header {
         var sourceIpBin = String.join(".", sipBinArray[0], sipBinArray[1], sipBinArray[2], sipBinArray[3]);
         var destinationIpBin = String.join(".", dipBinArray[0], dipBinArray[1], dipBinArray[2], dipBinArray[3]);
 
-        return String.join("-", versionBin,ihlBin,tosBin,packetLengthBin,identificationBin,flagsBin,fragsBin,ttlBin,protocolBin,checksumBin,sourceIpBin,destinationIpBin);
+        return String.join("-", versionBin,ihlBin,tosBin,packetLengthBin,identificationBin,flagsBin,fragsBin,
+                ttlBin,protocolBin,checksumBin,sourceIpBin,destinationIpBin);
     }
 
     /**

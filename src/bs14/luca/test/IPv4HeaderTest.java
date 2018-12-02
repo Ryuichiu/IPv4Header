@@ -11,28 +11,28 @@ class IPv4HeaderTest {
     @Test
     void testGetOutputCase1()
     {
-        IPv4Header ip = new IPv4Header("4-24-0-2-0-128-0-192.168.1.1-192.168.2.1");//4-24-0-000-0-128-0-192.168.1.1-192.168.2.1
-        assertEquals("4-5-24-736-0-2-0-128-0-279-192.168.1.1-192.168.2.1", ip.getOutput());
+        IPv4Header ip = new IPv4Header("4-24-0-2-0-128-0-192.168.1.1-192.168.2.1");
+        assertEquals("4-5-24-160-0-2-0-128-0-243-192.168.1.1-192.168.2.1", ip.getOutput());
 
     }
     @Test
     void testGetOutputCase2()
     {
         IPv4Header ip = new IPv4Header("4-24-0-1-0-120-0-1.1.1.1-2.2.2.2");
-        assertEquals("4-5-24-736-0-1-0-120-0-347-1.1.1.1-2.2.2.2", ip.getOutput());
+        assertEquals("4-5-24-160-0-1-0-120-0-311-1.1.1.1-2.2.2.2", ip.getOutput());
 
     }
     @Test
     void testGetOutputCase3()
     {
         IPv4Header ip = new IPv4Header("4-24-0-0-0-30-0-192.168.1.1-8.8.8.8");
-        assertEquals("4-5-24-736-0-0-0-30-0-352-192.168.1.1-8.8.8.8", ip.getOutput());
+        assertEquals("4-5-24-160-0-0-0-30-0-316-192.168.1.1-8.8.8.8", ip.getOutput());
     }
     @Test
     void testGetOutputCase4()
     {
         IPv4Header ip = new IPv4Header("4-24-0-2-0-128-0-0.0.0.0-192.168.2.1");
-        assertEquals("4-5-24-736-0-2-0-128-0-254-0.0.0.0-192.168.2.1", ip.getOutput());
+        assertEquals("4-5-24-160-0-2-0-128-0-218-0.0.0.0-192.168.2.1", ip.getOutput());
 
     }
 
@@ -41,28 +41,28 @@ class IPv4HeaderTest {
     void testGetOutputBinCase1()
     {
         IPv4Header ip = new IPv4Header("4-24-0-2-0-128-0-192.168.1.1-192.168.2.1");
-        assertEquals("0100-0101-00011000-0000001011100000-0000000000000000-010-0000000000000-10000000-00000000-0000000100010111-11000000.10101000.00000001.00000001-11000000.10101000.00000010.00000001", ip.getOutputBin());
+        assertEquals("0100-0101-00011000-0000000010100000-0000000000000000-010-0000000000000-10000000-00000000-0000000011110011-11000000.10101000.00000001.00000001-11000000.10101000.00000010.00000001", ip.getOutputBin());
     }
 
     @Test
     void testGetOutputBinCase2()
     {
         IPv4Header ip = new IPv4Header("4-24-0-1-0-120-0-1.1.1.1-2.2.2.2");
-        assertEquals("0100-0101-00011000-0000001011100000-0000000000000000-001-0000000000000-01111000-00000000-0000000101011011-00000001.00000001.00000001.00000001-00000010.00000010.00000010.00000010", ip.getOutputBin());
+        assertEquals("0100-0101-00011000-0000000010100000-0000000000000000-001-0000000000000-01111000-00000000-0000000100110111-00000001.00000001.00000001.00000001-00000010.00000010.00000010.00000010", ip.getOutputBin());
     }
 
     @Test
     void testGetOutputBinCase3()
     {
         IPv4Header ip = new IPv4Header("4-24-0-0-0-30-0-192.168.1.1-8.8.8.8");
-        assertEquals("0100-0101-00011000-0000001011100000-0000000000000000-000-0000000000000-00011110-00000000-0000000101100000-11000000.10101000.00000001.00000001-00001000.00001000.00001000.00001000", ip.getOutputBin());
+        assertEquals("0100-0101-00011000-0000000010100000-0000000000000000-000-0000000000000-00011110-00000000-0000000100111100-11000000.10101000.00000001.00000001-00001000.00001000.00001000.00001000", ip.getOutputBin());
     }
 
     @Test
     void testGetOutputBinCase4()
     {
         IPv4Header ip = new IPv4Header("4-24-0-2-0-128-0-0.0.0.0-192.168.2.1");
-        assertEquals("0100-0101-00011000-0000001011100000-0000000000000000-010-0000000000000-10000000-00000000-0000000011111110-00000000.00000000.00000000.00000000-11000000.10101000.00000010.00000001", ip.getOutputBin());
+        assertEquals("0100-0101-00011000-0000000010100000-0000000000000000-010-0000000000000-10000000-00000000-0000000011011010-00000000.00000000.00000000.00000000-11000000.10101000.00000010.00000001", ip.getOutputBin());
     }
 
     //Testet die Ausgabe der eingegebenen binären Werte in der dezimalen Darstellung (Notwendig für Note 2)
@@ -102,24 +102,24 @@ class IPv4HeaderTest {
     @Test
     void testGetChecksumCase1() {
         IPv4Header ip = new IPv4Header("4-24-0-2-0-128-0-192.168.1.1-192.168.2.1");
-        assertEquals(279, ip.getChecksum());
+        assertEquals(243, ip.getChecksum());
     }
 
     @Test
     void testGetChecksumCase2() {
         IPv4Header ip = new IPv4Header("4-24-0-1-0-120-0-1.1.1.1-2.2.2.2");
-        assertEquals(347, ip.getChecksum());
+        assertEquals(311, ip.getChecksum());
     }
 
     @Test
     void testGetChecksumCase3() {
         IPv4Header ip = new IPv4Header("4-24-0-0-0-30-0-192.168.1.1-8.8.8.8");
-        assertEquals(352, ip.getChecksum());
+        assertEquals(316, ip.getChecksum());
     }
 
     @Test
     void testGetChecksumCase4() {
         IPv4Header ip = new IPv4Header("4-24-0-2-0-128-0-0.0.0.0-192.168.2.1");
-        assertEquals(254, ip.getChecksum());
+        assertEquals(218, ip.getChecksum());
     }
 }

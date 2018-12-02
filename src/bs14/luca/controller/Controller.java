@@ -22,8 +22,6 @@ public class Controller {
         System.out.println(inputBin);
         var ipBin = new IPv4Header(inputBin);
         System.out.println(ipBin.getOutputBinToDec());
-        //4-24-0-1-0-128-0-1.1.1.1-2.2.2.2"
-        //4-5-24-736-0-1-0-128-0-188-1.1.1.1-2.2.2.2
     }
 
     /**
@@ -36,7 +34,7 @@ public class Controller {
 
         System.out.println("Please enter the version: ");
         var version = sc.nextLine();
-        while (!"4".equals(version)) version = sc.nextLine();
+        while (!"4".equals(version)) System.out.println("This version accepts only IPv4"); version = sc.nextLine();
         System.out.println("Please enter the time to live (ttl): ");
         var ttl = sc.nextLine();
         System.out.println("Please enter source IP: ");
