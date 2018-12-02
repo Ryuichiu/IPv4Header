@@ -78,7 +78,7 @@ public class Controller {
             ttl = sc.nextInt();
         }
         catch (InputMismatchException e) {
-            System.out.println("Please enter a valid number;");
+            System.out.println("Please enter a valid number:");
             getTtl();
         }
 
